@@ -1,26 +1,69 @@
 # governed-analytics-mcp
 
-An MCP server for analytics agents that queries as the person asking. The agent picks the metric and the warehouse decides which rows the asker may see, using the same row-level security their dashboards already obey.
-
-It pairs with the post [Your analytics agent should query as the person asking](https://goldlayer.dev/writing/agent-should-query-as-the-asker.html) and runs on the post's fictional coffee chain, Copper Kettle Coffee: Emma runs Oregon, Jake runs finance and sees everything.
+**Lets an AI assistant answer data questions for many people at once, while each person sees only the data they're already allowed to see in their own reports.**
 
 <img src="docs/images/two-colleagues.png" width="820" alt="Emma, who runs Oregon, and Jake, from finance, both ask for October 2026 revenue by region. The server sends identical SQL for both. Emma gets one row, Oregon at $680,000, while California and Washington are crossed out as not hers. Jake gets all three: Oregon $680,000, California $870,000, Washington $1,150,000.">
 
-## In plain words
+## At a glance
 
-**The problem.** Companies are adding AI assistants that answer questions about their data: "What were sales last month?" Most of these assistants log in to the company database with one shared account that can see everything. So when Emma, who manages Oregon, asks a question, the assistant can show her numbers from Washington and California too. Those are numbers she would never see in her normal reports.
+### The problem
 
-**The idea.** A hotel gives each guest a key card that opens only their own room. This project gives the assistant the same thing: every question runs with the key card of the person who asked it. The assistant decides *what* to ask. The database decides *what that person is allowed to see*, using the same rules it already applies to their reports.
+Companies are adding AI assistants that answer questions like "what were sales last month?" Most of these assistants log in to the database with one shared account that can see everything. So when Emma, who manages Oregon, asks a question, the assistant can show her Washington's and California's numbers too: figures she would never see in her normal reports. Nobody broke a rule on purpose. The assistant just isn't held to the rules everyone else is.
 
-**How it works, step by step:**
+### How it works, simply
+
+A hotel gives each guest a key card that opens only their own room. This project gives the assistant the same thing: every question runs with the key card of the person who asked it.
 
 1. Emma asks the assistant a question.
-2. The assistant passes the question to this server, along with proof that Emma is the one asking.
+2. The assistant passes it to this server, with proof that Emma is the one asking.
 3. The server turns the question into a database query and runs it as Emma, not as an all-seeing account.
-4. The database returns only Oregon, because that's what Emma is allowed to see. Jake from finance, asking the same question, gets all three regions.
-5. Every question is written to a log, so the data team can see who asked what and what was refused.
+4. The database returns only Oregon, because that's what Emma may see. Jake from finance asks the same question and gets all three regions.
+5. Every question is logged, so the data team can see who asked what and what was refused.
 
-**How we know it works.** A set of automatic tests asks questions as four different people, including tricky ones like "show me Washington anyway". The tests fail if anyone ever gets a number they shouldn't see. When we deliberately switch back to the shared all-seeing account, the same tests catch 12 leaks out of 15 questions.
+The assistant decides *what* to ask. The database decides *what that person may see*, using the rules it already applies to their dashboards.
+
+### What you get
+
+- **No leaks by design.** Automatic tests ask 15 questions as four different people, including "show me Washington anyway". Result: 0 leaks. Switch to the common shared-account setup and the same tests find 12 leaks out of 15.
+- **The same answer as the dashboard.** The assistant obeys the same access rules as the reports people already trust, so numbers don't disagree.
+- **The AI can't write its own SQL.** It picks from a list of approved metrics, so it can't query a table nobody signed off on.
+- **A cache that can't mix people up.** Saved answers are stored per person, so Jake's answer is never served to Emma. The tests prove the naive version leaks.
+- **An audit trail.** Every question, refusal and empty result is logged and turned into a dbt table you can report on.
+
+### Analytics engineering tasks it covers
+
+- Giving AI assistants safe access to the warehouse
+- Row-level security and access policies
+- Defining governed metrics (a small semantic layer)
+- Testing data access per person, not just per query
+- Finding summary tables that bypass row-level security
+- Audit logging and usage analytics in dbt
+
+### Can I use it at work?
+
+- **It's a reference implementation, not a product.** It runs on Postgres with a demo login, so you can see the whole pattern working end to end.
+- **Three things you can do this week, with no code:**
+  1. *The two-colleague test.* Ask your AI assistant the same question as two people with different access. If they get the same answer, the assistant ignores your access rules.
+  2. *Check the login.* Find out which account your assistant connects with. If it's the account that builds your dbt models, it sees everything.
+  3. *Write tests per person.* For every question in your assistant's test set, write down who is asking and what they may see, including questions that must return nothing.
+- **To run it for real:** on Postgres with row-level security, connect your identity provider and it works as is. On Snowflake or Databricks, swap the role switch for a per-person login token; [docs/decisions.md](docs/decisions.md) explains how. Plan for days rather than hours, and involve your security team.
+
+### Try it in two minutes, without Docker
+
+```bash
+git clone https://github.com/PZawieja/governed-analytics-mcp && cd governed-analytics-mcp
+uv sync --all-extras && (cd warehouse/dbt && uv run dbt build --profiles-dir .)
+uv run gamcp call --backend duckdb --as emma query_metric revenue --by region --month 2026-10
+uv run gamcp call --backend duckdb --as jake query_metric revenue --by region --month 2026-10
+```
+
+Emma gets one row (Oregon, $680,000), Jake gets three. This quick mode filters inside the server; the real setup, where Postgres row-level security does the filtering, is in the [Quickstart](#quickstart).
+
+## What it does
+
+An MCP server for analytics agents that queries as the person asking. The agent picks the metric and the warehouse decides which rows the asker may see, using the same row-level security their dashboards already obey.
+
+It pairs with the post [Your analytics agent should query as the person asking](https://goldlayer.dev/writing/agent-should-query-as-the-asker.html) and runs on the post's fictional coffee chain, Copper Kettle Coffee: Emma runs Oregon, Jake runs finance and sees everything.
 
 ## The two-colleague test
 
