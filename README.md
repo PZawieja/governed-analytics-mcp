@@ -4,6 +4,22 @@ An MCP server for analytics agents that queries as the person asking. The agent 
 
 It pairs with the post [Your analytics agent should query as the person asking](https://goldlayer.dev/writing/agent-should-query-as-the-asker.html) and runs on the post's fictional coffee chain, Copper Kettle Coffee: Emma runs Oregon, Jake runs finance and sees everything.
 
+## In plain words
+
+**The problem.** Companies are adding AI assistants that answer questions about their data: "What were sales last month?" Most of these assistants log in to the company database with one shared account that can see everything. So when Emma, who manages Oregon, asks a question, the assistant can show her numbers from Washington and California too. Those are numbers she would never see in her normal reports.
+
+**The idea.** A hotel gives each guest a key card that opens only their own room. This project gives the assistant the same thing: every question runs with the key card of the person who asked it. The assistant decides *what* to ask. The database decides *what that person is allowed to see*, using the same rules it already applies to their reports.
+
+**How it works, step by step:**
+
+1. Emma asks the assistant a question.
+2. The assistant passes the question to this server, along with proof that Emma is the one asking.
+3. The server turns the question into a database query and runs it as Emma, not as an all-seeing account.
+4. The database returns only Oregon, because that's what Emma is allowed to see. Jake from finance, asking the same question, gets all three regions.
+5. Every question is written to a log, so the data team can see who asked what and what was refused.
+
+**How we know it works.** A set of automatic tests asks questions as four different people, including tricky ones like "show me Washington anyway". The tests fail if anyone ever gets a number they shouldn't see. When we deliberately switch back to the shared all-seeing account, the same tests catch 12 leaks out of 15 questions.
+
 ## The two-colleague test
 
 The same tool call, made as two people (real output, trimmed):
