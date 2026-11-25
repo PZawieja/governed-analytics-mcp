@@ -4,6 +4,8 @@ An MCP server for analytics agents that queries as the person asking. The agent 
 
 It pairs with the post [Your analytics agent should query as the person asking](https://goldlayer.dev/writing/agent-should-query-as-the-asker.html) and runs on the post's fictional coffee chain, Copper Kettle Coffee: Emma runs Oregon, Jake runs finance and sees everything.
 
+<img src="docs/images/two-colleagues.png" width="820" alt="Emma, who runs Oregon, and Jake, from finance, both ask for October 2026 revenue by region. The server sends identical SQL for both. Emma gets one row, Oregon at $680,000, while California and Washington are crossed out as not hers. Jake gets all three: Oregon $680,000, California $870,000, Washington $1,150,000.">
+
 ## In plain words
 
 **The problem.** Companies are adding AI assistants that answer questions about their data: "What were sales last month?" Most of these assistants log in to the company database with one shared account that can see everything. So when Emma, who manages Oregon, asks a question, the assistant can show her numbers from Washington and California too. Those are numbers she would never see in her normal reports.
