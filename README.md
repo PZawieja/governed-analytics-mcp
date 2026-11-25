@@ -185,6 +185,7 @@ This repo is narrower than any of them: a small reference for one idea. The pers
 | 2 | [llmops-eval-harness](https://github.com/PZawieja/llmops-eval-harness) | Scored eval loop, cost/latency tracking, regression gate |
 | 3 | [semantic-layer-agent](https://github.com/PZawieja/semantic-layer-agent) | Agent on the dbt Semantic Layer: disambiguation, templates, memory |
 | 4 | governed-analytics-mcp (this repo) | MCP server that queries as the asker: warehouse RLS, persona evals, audit log |
+| 5 | [dbt-llm-enrich](https://github.com/PZawieja/dbt-llm-enrich) | LLM classification as a tested dbt layer: content-hash cache, Batches API, golden-set accuracy tests, cost table |
 
 ## Development
 
