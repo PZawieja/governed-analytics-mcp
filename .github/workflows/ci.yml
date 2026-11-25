@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uvx ruff check .
+      - run: uvx ruff format --check .
+      - run: uv sync && uv run sqlfluff lint warehouse/dbt/models
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: copper_kettle
+        ports:
+          - 54329:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d copper_kettle"
+          --health-interval 2s --health-retries 15
+    env:
+      GAMCP_REQUIRE_PG: "1"
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --all-extras
+      - name: dbt build (DuckDB)
+        working-directory: warehouse/dbt
+        run: uv run dbt build --profiles-dir .
+      - name: Copy marts into Postgres and apply RLS
+        run: uv run python warehouse/load_pg.py
+      - name: Every mart declares how agents may read it
+        run: uv run gamcp check
+      - run: uv run pytest -q
+      - name: Persona evals, 0-leak gate
+        run: uv run gamcp eval
+      - name: The gate goes red on the shared-account setup
+        run: "! uv run gamcp eval --backend postgres-shared-account > /dev/null"
+      - name: Agent evals (only with the ANTHROPIC_API_KEY secret)
+        if: ${{ env.ANTHROPIC_API_KEY != '' }}
+        run: uv run gamcp eval --backend postgres --agent

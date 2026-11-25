@@ -1,0 +1,50 @@
+[project]
+name = "governed-analytics-mcp"
+version = "0.1.0"
+description = "An MCP server for analytics agents that queries as the person asking, so the warehouse's row-level security decides what they see."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Piotr Zawieja" }]
+requires-python = ">=3.12"
+dependencies = [
+    "dbt-duckdb>=1.9",
+    "duckdb>=1.1",
+    "fastmcp>=4.2.6",
+    "mcp>=1.20",
+    "psycopg[binary]>=3.2",
+    "pyjwt[crypto]>=2.9",
+    "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+ai = [
+    "anthropic>=0.70",
+]
+
+[project.scripts]
+gamcp = "governed_analytics_mcp.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "sqlfluff>=4.5.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.20,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+extend-exclude = ["warehouse/dbt/dbt_packages", "warehouse/dbt/target"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["postgres: needs the Postgres container (docker compose up -d)"]

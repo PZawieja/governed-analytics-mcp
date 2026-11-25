@@ -1,0 +1,31 @@
+name: copper_kettle
+version: "1.0.0"
+profile: copper_kettle
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+models:
+  copper_kettle:
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: view
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+
+seeds:
+  copper_kettle:
+    +schema: raw
+    raw_store_sales:
+      +column_types:
+        sale_date: date
+        revenue_usd: decimal(12, 2)
+        transactions: integer
+    raw_stores:
+      +column_types:
+        opened_on: date

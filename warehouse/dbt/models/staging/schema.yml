@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: stg_stores
+    description: One row per store.
+    columns:
+      - name: store_id
+        data_tests: [not_null, unique]
+      - name: region
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Oregon, Washington, California]
+
+  - name: stg_store_sales
+    description: One row per store per day.
+    columns:
+      - name: store_id
+        data_tests: [not_null]
+      - name: sale_date
+        data_tests: [not_null]
+      - name: revenue_usd
+        data_tests: [not_null]
+
+  - name: stg_region_access
+    description: One row per user per region they may see.
+    columns:
+      - name: user_name
+        data_tests: [not_null]
+      - name: region
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Oregon, Washington, California]
+
+  - name: stg_agent_audit_log
+    description: One row per MCP tool call, from the server's audit log.
+    columns:
+      - name: audit_event_id
+        data_tests: [not_null]
+      - name: user_id
+        data_tests: [not_null]
+      - name: tool
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [list_metrics, describe_metric, query_metric, explain_last_query]
+      - name: outcome
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [ok, denied, invalid]

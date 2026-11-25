@@ -1,0 +1,16 @@
+store_id,store_name,city,region,opened_on
+OR-PDX-01,Pearl District,Portland,Oregon,2019-03-04
+OR-PDX-02,Hawthorne,Portland,Oregon,2020-06-15
+OR-EUG-01,Fifth Street,Eugene,Oregon,2021-02-01
+OR-SLM-01,Court Street,Salem,Oregon,2022-09-12
+OR-BND-01,Old Mill,Bend,Oregon,2023-05-20
+WA-SEA-01,Capitol Hill,Seattle,Washington,2018-11-01
+WA-SEA-02,Ballard,Seattle,Washington,2019-08-19
+WA-SEA-03,Fremont,Seattle,Washington,2021-04-05
+WA-TAC-01,Stadium District,Tacoma,Washington,2022-01-10
+WA-SPO-01,Riverfront,Spokane,Washington,2023-03-27
+WA-OLY-01,Capitol Way,Olympia,Washington,2024-07-08
+CA-SFO-01,Mission,San Francisco,California,2020-10-05
+CA-OAK-01,Temescal,Oakland,California,2021-11-15
+CA-SAC-01,Midtown,Sacramento,California,2023-02-13
+CA-ARC-01,Plaza,Arcata,California,2024-04-22

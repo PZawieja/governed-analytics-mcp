@@ -1,0 +1,34 @@
+# The only queries the agent can run. Identifiers come from here, values become
+# bind parameters, and the warehouse decides which rows the asker gets back.
+models:
+  fct_store_sales:
+    time_column: sale_date
+    dimensions:
+      region: region
+      store: store_id
+      month: sale_month
+
+  fct_company_monthly_total:
+    time_column: sale_month
+    dimensions:
+      month: sale_month
+
+metrics:
+  revenue:
+    model: fct_store_sales
+    expr: SUM(revenue_usd)
+    description: Gross sales in US dollars.
+  transactions:
+    model: fct_store_sales
+    expr: SUM(transactions)
+    description: Number of receipts.
+  avg_ticket:
+    model: fct_store_sales
+    expr: ROUND(SUM(revenue_usd) / NULLIF(SUM(transactions), 0), 2)
+    description: Revenue per receipt in US dollars.
+  company_revenue:
+    model: fct_company_monthly_total
+    expr: SUM(revenue_usd)
+    description: >
+      Company-wide revenue from the monthly summary table. It has no region column,
+      so only people granted every region may read it.

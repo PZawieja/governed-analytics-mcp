@@ -1,0 +1,85 @@
+version: 2
+
+# Every mart declares how an agent may read it, and CI fails if one doesn't:
+#   meta.policy_column: the column the row-level policy filters on
+#   meta.agent_access: all_regions_only (only users granted every region) or hidden
+
+models:
+  - name: fct_store_sales
+    description: One row per store per day. Row-level security filters it by region.
+    meta:
+      policy_column: region
+    columns:
+      - name: store_sale_id
+        description: store_id and sale_date, the grain of this table.
+        data_tests: [not_null, unique]
+      - name: sale_date
+        data_tests: [not_null]
+      - name: sale_month
+        data_tests: [not_null]
+      - name: store_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_stores')
+                field: store_id
+      - name: region
+        data_tests: [not_null]
+      - name: revenue_usd
+        data_tests: [not_null]
+      - name: transactions
+        data_tests: [not_null]
+
+  - name: dim_stores
+    description: One row per store. Row-level security filters it by region.
+    meta:
+      policy_column: region
+    columns:
+      - name: store_id
+        data_tests: [not_null, unique]
+      - name: region
+        data_tests: [not_null]
+
+  - name: dim_region_access
+    description: >
+      Which regions each user may see, published as region_access. The row-level
+      policies read it. Never exposed as a metric source.
+    meta:
+      agent_access: hidden
+    columns:
+      - name: region_access_id
+        data_tests: [not_null, unique]
+      - name: user_name
+        data_tests: [not_null]
+      - name: region
+        data_tests: [not_null]
+
+  - name: fct_company_monthly_total
+    description: >
+      Company revenue per month. Built from every row and has no region column left,
+      so no row policy can scope it. Only users granted every region may read it.
+    meta:
+      agent_access: all_regions_only
+    columns:
+      - name: sale_month
+        data_tests: [not_null, unique]
+      - name: revenue_usd
+        data_tests: [not_null]
+
+  - name: fct_agent_queries
+    description: >
+      Metric queries per user per backend per day: denials, empty results, cache hits.
+      For the data team, never for agents.
+    meta:
+      agent_access: hidden
+    columns:
+      - name: agent_query_day_id
+        description: user_id, backend and called_on, the grain.
+        data_tests: [not_null, unique]
+      - name: called_on
+        data_tests: [not_null]
+      - name: user_id
+        data_tests: [not_null]
+      - name: metric_queries
+        data_tests: [not_null]

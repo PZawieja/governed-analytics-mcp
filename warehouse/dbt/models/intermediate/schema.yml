@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: int_store_daily_sales
+    description: Daily store sales with the store's region attached.
+    columns:
+      - name: store_sale_id
+        description: store_id and sale_date, the grain.
+        data_tests: [not_null, unique]
+      - name: region
+        data_tests: [not_null]

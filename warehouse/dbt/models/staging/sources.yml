@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: agent
+    description: Audit log the MCP server appends to, one JSON line per tool call.
+    tables:
+      - name: audit_log
+        config:
+          external_location: >-
+            read_json_auto('{{ env_var("GAMCP_AUDIT_PATH", "../../audit/sample_audit_log.jsonl") }}',
+            format = 'newline_delimited')
