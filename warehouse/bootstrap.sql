@@ -28,4 +28,4 @@ $$;
 GRANT CREATE ON DATABASE copper_kettle TO transformer;
 GRANT analyst TO emma, jake, dana, sam;
 GRANT all_regions_reader TO jake;
-GRANT emma, jake, dana, sam TO agent_gateway WITH INHERIT FALSE, SET TRUE;
+GRANT emma, jake, dana, sam TO agent_gateway WITH INHERIT FALSE, SET TRUE;  -- noqa: PRS

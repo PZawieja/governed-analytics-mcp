@@ -13,7 +13,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uvx ruff check .
       - run: uvx ruff format --check .
-      - run: uv sync && uv run sqlfluff lint warehouse/dbt/models
+      - run: uv sync && uv run sqlfluff lint warehouse/dbt/models warehouse/policies.sql warehouse/bootstrap.sql
 
   test:
     runs-on: ubuntu-latest
